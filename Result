@@ -1,0 +1,167 @@
+> var.factor
+[1] "Q_PHX_DX_STK"   "Q_PHX_DX_HTDZ"  "Q_PHX_DX_HTN"   "Q_PHX_DX_DM"    "Q_PHX_DX_DLD"   "Q_PHX_DX_PTB"  
+[7] "Q_HBV_AG"       "Q_SMK_YN"       "Q_DRK_FRQ_V09N"
+> var.conti <- names(a)[!(names(a) %in% var.factor)]
+> var.conti
+ [1] "EXMD_BZ_YYYY" "RN_INDI"      "HME_YYYYMM"   "HGHT"         "WGHT"         "WSTC"        
+ [7] "BMI"          "VA_LT"        "VA_RT"        "BP_SYS"       "BP_DIA"       "URN_PROT"    
+[13] "HGB"          "FBS"          "TOT_CHOL"     "TG"           "HDL"          "LDL"         
+[19] "CRTN"         "SGOT"         "SGPT"         "GGT"          "GFR"         
+> a[, (var.factor) := lapply(.SD, as.factor), .SD = var.factor]
+> a[, (var.conti) := lapply(.SD, as.numeric), .SD = var.conti]
+> sapply(a, class)
+  EXMD_BZ_YYYY        RN_INDI     HME_YYYYMM   Q_PHX_DX_STK  Q_PHX_DX_HTDZ   Q_PHX_DX_HTN    Q_PHX_DX_DM 
+     "numeric"      "numeric"      "numeric"       "factor"       "factor"       "factor"       "factor" 
+  Q_PHX_DX_DLD   Q_PHX_DX_PTB       Q_HBV_AG       Q_SMK_YN Q_DRK_FRQ_V09N           HGHT           WGHT 
+      "factor"       "factor"       "factor"       "factor"       "factor"      "numeric"      "numeric" 
+          WSTC            BMI          VA_LT          VA_RT         BP_SYS         BP_DIA       URN_PROT 
+     "numeric"      "numeric"      "numeric"      "numeric"      "numeric"      "numeric"      "numeric" 
+           HGB            FBS       TOT_CHOL             TG            HDL            LDL           CRTN 
+     "numeric"      "numeric"      "numeric"      "numeric"      "numeric"      "numeric"      "numeric" 
+          SGOT           SGPT            GGT            GFR 
+     "numeric"      "numeric"      "numeric"      "numeric" 
+> both <- aggregate(cbind(WSTC, BMI) ~ EXMD_BZ_YYYY, data = a, function(x){c(mean = mean(x), sd = sd(x))})
+> aggregate(a[,c("WSTC","BMI")], list(a$EXMD_BZ_YYYY), mean)  # 연도별 평균
+  Group.1     WSTC      BMI
+1    2009 79.55607 23.76402
+2    2010 80.84746 23.82712
+3    2011 80.61883 23.96009
+4    2012 80.91453 24.08932
+5    2013 80.84774 23.75391
+6    2014 80.71260 23.78031
+7    2015 81.20417 24.28167
+> aggregate(a[,c("WSTC","BMI")], list(a$EXMD_BZ_YYYY), sd)    # 연도별 표준 편차 
+  Group.1     WSTC      BMI
+1    2009 9.528023 3.392946
+2    2010 9.528124 3.274275
+3    2011 9.167756 3.456105
+4    2012 9.627904 3.338900
+5    2013 9.564778 3.329659
+6    2014 9.473913 3.323959
+7    2015 9.939776 3.544363
+> aggregate(cbind(WSTC, BMI) ~ EXMD_BZ_YYYY, data = a, function(x){c(mean = mean(x), sd = sd(x))})
+  EXMD_BZ_YYYY WSTC.mean   WSTC.sd  BMI.mean    BMI.sd
+1         2009 79.556075  9.528023 23.764019  3.392946
+2         2010 80.847458  9.528124 23.827119  3.274275
+3         2011 80.618834  9.167756 23.960090  3.456105
+4         2012 80.914530  9.627904 24.089316  3.338900
+5         2013 80.847737  9.564778 23.753909  3.329659
+6         2014 80.712598  9.473913 23.780315  3.323959
+7         2015 81.204167  9.939776 24.281667  3.544363
+> # Boxplot 그리기 
+> p <- ggboxplot(data= a, x= "EXMD_BZ_YYYY", y= "FBS")
+> ggboxplot(data= a, x= "EXMD_BZ_YYYY", y= "FBS")
+> # pptx로 저장하기
+> plot_file <- read_pptx() %>%
++   add_slide() %>% ph_with(dml(ggobj = p), location = ph_location_type(type="body"))
+> print(plot_file, target = "plot_file.pptx")
+> a <- fread("https://raw.githubusercontent.com/jinseob2kim/R-skku-biohrs/main/data/example_g1e.csv")
+ [100%] Downloaded 54847 bytes...
+> var.factor <- grep("Q_", names(a), value = T)
+> var.factor
+[1] "Q_PHX_DX_STK"   "Q_PHX_DX_HTDZ"  "Q_PHX_DX_HTN"   "Q_PHX_DX_DM"    "Q_PHX_DX_DLD"   "Q_PHX_DX_PTB"  
+[7] "Q_HBV_AG"       "Q_SMK_YN"       "Q_DRK_FRQ_V09N"
+> var.conti <- names(a)[!(names(a) %in% var.factor)]
+> var.conti
+ [1] "EXMD_BZ_YYYY" "RN_INDI"      "HME_YYYYMM"   "HGHT"         "WGHT"         "WSTC"        
+ [7] "BMI"          "VA_LT"        "VA_RT"        "BP_SYS"       "BP_DIA"       "URN_PROT"    
+[13] "HGB"          "FBS"          "TOT_CHOL"     "TG"           "HDL"          "LDL"         
+[19] "CRTN"         "SGOT"         "SGPT"         "GGT"          "GFR"         
+> a[, (var.factor) := lapply(.SD, as.factor), .SD = var.factor]
+> a[, (var.conti) := lapply(.SD, as.numeric), .SD = var.conti]
+> sapply(a, class)
+  EXMD_BZ_YYYY        RN_INDI     HME_YYYYMM   Q_PHX_DX_STK  Q_PHX_DX_HTDZ   Q_PHX_DX_HTN    Q_PHX_DX_DM 
+     "numeric"      "numeric"      "numeric"       "factor"       "factor"       "factor"       "factor" 
+  Q_PHX_DX_DLD   Q_PHX_DX_PTB       Q_HBV_AG       Q_SMK_YN Q_DRK_FRQ_V09N           HGHT           WGHT 
+      "factor"       "factor"       "factor"       "factor"       "factor"      "numeric"      "numeric" 
+          WSTC            BMI          VA_LT          VA_RT         BP_SYS         BP_DIA       URN_PROT 
+     "numeric"      "numeric"      "numeric"      "numeric"      "numeric"      "numeric"      "numeric" 
+           HGB            FBS       TOT_CHOL             TG            HDL            LDL           CRTN 
+     "numeric"      "numeric"      "numeric"      "numeric"      "numeric"      "numeric"      "numeric" 
+          SGOT           SGPT            GGT            GFR 
+     "numeric"      "numeric"      "numeric"      "numeric" 
+> both <- aggregate(cbind(WSTC, BMI) ~ EXMD_BZ_YYYY, data = a, function(x){c(mean = mean(x), sd = sd(x))})
+> aggregate(a[,c("WSTC","BMI")], list(a$EXMD_BZ_YYYY), mean)  # 연도별 평균
+  Group.1     WSTC      BMI
+1    2009 79.55607 23.76402
+2    2010 80.84746 23.82712
+3    2011 80.61883 23.96009
+4    2012 80.91453 24.08932
+5    2013 80.84774 23.75391
+6    2014 80.71260 23.78031
+7    2015 81.20417 24.28167
+> aggregate(a[,c("WSTC","BMI")], list(a$EXMD_BZ_YYYY), sd)    # 연도별 표준 편차 
+  Group.1     WSTC      BMI
+1    2009 9.528023 3.392946
+2    2010 9.528124 3.274275
+3    2011 9.167756 3.456105
+4    2012 9.627904 3.338900
+5    2013 9.564778 3.329659
+6    2014 9.473913 3.323959
+7    2015 9.939776 3.544363
+> aggregate(cbind(WSTC, BMI) ~ EXMD_BZ_YYYY, data = a, function(x){c(mean = mean(x), sd = sd(x))})
+  EXMD_BZ_YYYY WSTC.mean   WSTC.sd  BMI.mean    BMI.sd
+1         2009 79.556075  9.528023 23.764019  3.392946
+2         2010 80.847458  9.528124 23.827119  3.274275
+3         2011 80.618834  9.167756 23.960090  3.456105
+4         2012 80.914530  9.627904 24.089316  3.338900
+5         2013 80.847737  9.564778 23.753909  3.329659
+6         2014 80.712598  9.473913 23.780315  3.323959
+7         2015 81.204167  9.939776 24.281667  3.544363
+> # Boxplot 그리기 
+> p <- ggboxplot(data= a, x= "EXMD_BZ_YYYY", y= "FBS")
+> ggboxplot(data= a, x= "EXMD_BZ_YYYY", y= "FBS")
+> library(data.table);library(magrittr);library(ggpubr);library(rvg);library(officer) 
+> a <- fread("https://raw.githubusercontent.com/jinseob2kim/R-skku-biohrs/main/data/example_g1e.csv")
+ [100%] Downloaded 54847 bytes...
+> var.factor <- grep("Q_", names(a), value = T)
+> var.factor
+[1] "Q_PHX_DX_STK"   "Q_PHX_DX_HTDZ"  "Q_PHX_DX_HTN"   "Q_PHX_DX_DM"    "Q_PHX_DX_DLD"   "Q_PHX_DX_PTB"  
+[7] "Q_HBV_AG"       "Q_SMK_YN"       "Q_DRK_FRQ_V09N"
+> var.conti <- names(a)[!(names(a) %in% var.factor)]
+> var.conti
+ [1] "EXMD_BZ_YYYY" "RN_INDI"      "HME_YYYYMM"   "HGHT"         "WGHT"         "WSTC"        
+ [7] "BMI"          "VA_LT"        "VA_RT"        "BP_SYS"       "BP_DIA"       "URN_PROT"    
+[13] "HGB"          "FBS"          "TOT_CHOL"     "TG"           "HDL"          "LDL"         
+[19] "CRTN"         "SGOT"         "SGPT"         "GGT"          "GFR"         
+> a[, (var.factor) := lapply(.SD, as.factor), .SD = var.factor]
+> a[, (var.conti) := lapply(.SD, as.numeric), .SD = var.conti]
+> sapply(a, class)
+  EXMD_BZ_YYYY        RN_INDI     HME_YYYYMM   Q_PHX_DX_STK  Q_PHX_DX_HTDZ   Q_PHX_DX_HTN    Q_PHX_DX_DM 
+     "numeric"      "numeric"      "numeric"       "factor"       "factor"       "factor"       "factor" 
+  Q_PHX_DX_DLD   Q_PHX_DX_PTB       Q_HBV_AG       Q_SMK_YN Q_DRK_FRQ_V09N           HGHT           WGHT 
+      "factor"       "factor"       "factor"       "factor"       "factor"      "numeric"      "numeric" 
+          WSTC            BMI          VA_LT          VA_RT         BP_SYS         BP_DIA       URN_PROT 
+     "numeric"      "numeric"      "numeric"      "numeric"      "numeric"      "numeric"      "numeric" 
+           HGB            FBS       TOT_CHOL             TG            HDL            LDL           CRTN 
+     "numeric"      "numeric"      "numeric"      "numeric"      "numeric"      "numeric"      "numeric" 
+          SGOT           SGPT            GGT            GFR 
+     "numeric"      "numeric"      "numeric"      "numeric" 
+> both <- aggregate(cbind(WSTC, BMI) ~ EXMD_BZ_YYYY, data = a, function(x){c(mean = mean(x), sd = sd(x))})
+> aggregate(a[,c("WSTC","BMI")], list(a$EXMD_BZ_YYYY), mean)  # 연도별 평균
+  Group.1     WSTC      BMI
+1    2009 79.55607 23.76402
+2    2010 80.84746 23.82712
+3    2011 80.61883 23.96009
+4    2012 80.91453 24.08932
+5    2013 80.84774 23.75391
+6    2014 80.71260 23.78031
+7    2015 81.20417 24.28167
+> aggregate(a[,c("WSTC","BMI")], list(a$EXMD_BZ_YYYY), sd)    # 연도별 표준 편차 
+  Group.1     WSTC      BMI
+1    2009 9.528023 3.392946
+2    2010 9.528124 3.274275
+3    2011 9.167756 3.456105
+4    2012 9.627904 3.338900
+5    2013 9.564778 3.329659
+6    2014 9.473913 3.323959
+7    2015 9.939776 3.544363
+> aggregate(cbind(WSTC, BMI) ~ EXMD_BZ_YYYY, data = a, function(x){c(mean = mean(x), sd = sd(x))})
+  EXMD_BZ_YYYY WSTC.mean   WSTC.sd  BMI.mean    BMI.sd
+1         2009 79.556075  9.528023 23.764019  3.392946
+2         2010 80.847458  9.528124 23.827119  3.274275
+3         2011 80.618834  9.167756 23.960090  3.456105
+4         2012 80.914530  9.627904 24.089316  3.338900
+5         2013 80.847737  9.564778 23.753909  3.329659
+6         2014 80.712598  9.473913 23.780315  3.323959
+7         2015 81.204167  9.939776 24.281667  3.544363
